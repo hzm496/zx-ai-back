@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.CommentMapper">
+
+    <resultMap id="BaseResultMap" type="com.zm.zx.web.domain.po.Comment">
+        <id property="id" column="id" />
+        <result property="userId" column="user_id" />
+        <result property="courseId" column="course_id" />
+        <result property="content" column="content" />
+        <result property="rating" column="rating" />
+        <result property="parentId" column="parent_id" />
+        <result property="replyToUserId" column="reply_to_user_id" />
+        <result property="likeCount" column="like_count" />
+        <result property="status" column="status" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, course_id, content, rating, parent_id, 
+        reply_to_user_id, like_count, status, create_time, update_time
+    </sql>
+
+    <!-- 查询课程的一级评论列表（分页） -->
+    <select id="selectFirstLevelComments" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM comment
+        WHERE course_id = #{courseId}
+        AND parent_id = 0
+        AND status = 1
+        ORDER BY create_time DESC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 统计课程的一级评论总数 -->
+    <select id="countFirstLevelComments" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE course_id = #{courseId}
+        AND parent_id = 0
+        AND status = 1
+    </select>
+
+    <!-- 查询某评论的回复列表（分页） -->
+    <select id="selectRepliesByParentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM comment
+        WHERE parent_id = #{parentId}
+        AND status = 1
+        ORDER BY create_time ASC
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+
+    <!-- 统计某评论的回复总数 -->
+    <select id="countRepliesByParentId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE parent_id = #{parentId}
+        AND status = 1
+    </select>
+
+    <!-- 查询某评论的第一条回复 -->
+    <select id="selectFirstReplyByParentId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM comment
+        WHERE parent_id = #{parentId}
+        AND status = 1
+        ORDER BY create_time ASC
+        LIMIT 1
+    </select>
+
+    <!-- 批量查询评论的回复数量 -->
+    <select id="countRepliesByParentIds" resultType="com.zm.zx.web.mapper.CommentMapper$CommentReplyCount">
+        SELECT
+            parent_id AS parentId,
+            COUNT(*) AS replyCount
+        FROM comment
+        WHERE parent_id IN
+        <foreach collection="commentIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = 1
+        GROUP BY parent_id
+    </select>
+
+</mapper>
+

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.admin.mapper.AdminWithdrawOrderMapper">
+
+    <select id="selectWithdrawListWithUser" resultType="com.zm.zx.admin.model.vo.WithdrawOrderVO">
+        SELECT
+            wo.id,
+            wo.user_id AS userId,
+            u.username,
+            u.nickname,
+            wo.withdraw_no AS withdrawNo,
+            wo.amount,
+            wo.actual_amount AS actualAmount,
+            wo.fee,
+            wo.status,
+            wo.account_type AS accountType,
+            wo.account_info AS accountInfo,
+            wo.account_name AS accountName,
+            wo.reject_reason AS rejectReason,
+            wo.process_time AS processTime,
+            wo.process_admin_id AS processAdminId,
+            wo.alipay_order_id AS alipayOrderId,
+            wo.remark,
+            wo.create_time AS createTime,
+            wo.update_time AS updateTime
+        FROM withdraw_order wo
+        LEFT JOIN user u ON wo.user_id = u.id
+        <where>
+            <if test="withdrawNo != null and withdrawNo != ''">
+                AND wo.withdraw_no LIKE CONCAT('%', #{withdrawNo}, '%')
+            </if>
+            <if test="userId != null">
+                AND wo.user_id = #{userId}
+            </if>
+            <if test="status != null">
+                AND wo.status = #{status}
+            </if>
+        </where>
+        ORDER BY wo.create_time DESC
+    </select>
+
+    <select id="selectWithdrawByIdWithUser" resultType="com.zm.zx.admin.model.vo.WithdrawOrderVO">
+        SELECT
+            wo.id,
+            wo.user_id AS userId,
+            u.username,
+            u.nickname,
+            wo.withdraw_no AS withdrawNo,
+            wo.amount,
+            wo.actual_amount AS actualAmount,
+            wo.fee,
+            wo.status,
+            wo.account_type AS accountType,
+            wo.account_info AS accountInfo,
+            wo.account_name AS accountName,
+            wo.reject_reason AS rejectReason,
+            wo.process_time AS processTime,
+            wo.process_admin_id AS processAdminId,
+            wo.alipay_order_id AS alipayOrderId,
+            wo.remark,
+            wo.create_time AS createTime,
+            wo.update_time AS updateTime
+        FROM withdraw_order wo
+        LEFT JOIN user u ON wo.user_id = u.id
+        WHERE wo.id = #{id}
+    </select>
+
+</mapper>
+

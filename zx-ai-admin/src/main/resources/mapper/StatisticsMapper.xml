@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.admin.mapper.StatisticsMapper">
+    
+    <!-- 通用结果映射 -->
+    <resultMap id="StatisticsVOMap" type="com.zm.zx.admin.model.vo.StatisticsVO">
+        <id column="id" property="id"/>
+        <result column="stat_date" property="statDate"/>
+        <result column="new_user_count" property="newUserCount"/>
+        <result column="active_user_count" property="activeUserCount"/>
+        <result column="new_order_count" property="newOrderCount"/>
+        <result column="order_amount" property="orderAmount"/>
+        <result column="new_course_count" property="newCourseCount"/>
+        <result column="learning_duration" property="learningDuration"/>
+    </resultMap>
+    
+    <!-- 分页查询统计列表 -->
+    <select id="findStatisticsList" resultMap="StatisticsVOMap">
+        SELECT
+            id,
+            stat_date,
+            new_user_count,
+            active_user_count,
+            new_order_count,
+            order_amount,
+            new_course_count,
+            learning_duration
+        FROM statistics
+        <where>
+            <if test="dto.startDate != null">
+                AND stat_date &gt;= #{dto.startDate}
+            </if>
+            <if test="dto.endDate != null">
+                AND stat_date &lt;= #{dto.endDate}
+            </if>
+        </where>
+        ORDER BY stat_date DESC
+    </select>
+    
+    <!-- 查询最近N天的统计数据 -->
+    <select id="findRecentDays" resultMap="StatisticsVOMap">
+        SELECT
+            id,
+            stat_date,
+            new_user_count,
+            active_user_count,
+            new_order_count,
+            order_amount,
+            new_course_count,
+            learning_duration
+        FROM statistics
+        WHERE stat_date &gt;= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        ORDER BY stat_date ASC
+    </select>
+    
+    <!-- 获取仪表盘总览数据（统计 vip_order 和 course_order 两张表） -->
+    <select id="getDashboardOverview" resultType="com.zm.zx.admin.model.vo.DashboardOverviewVO">
+        SELECT
+            (SELECT COUNT(*) FROM user) AS totalUsers,
+            (SELECT COUNT(*) FROM course) AS totalCourses,
+            -- 总订单数：VIP订单 + 课程订单
+            (
+                (SELECT COUNT(*) FROM vip_order) + 
+                (SELECT COUNT(*) FROM course_order)
+            ) AS totalOrders,
+            -- 总收入：VIP订单收入 + 课程订单收入
+            (
+                (SELECT IFNULL(SUM(price), 0) FROM vip_order WHERE status = 1) +
+                (SELECT IFNULL(SUM(pay_amount), 0) FROM course_order WHERE status = 1)
+            ) AS totalRevenue,
+            -- 今日新增用户
+            (SELECT COUNT(*) FROM user WHERE DATE(create_time) = CURDATE()) AS todayNewUsers,
+            -- 今日新增订单：VIP订单 + 课程订单
+            (
+                (SELECT COUNT(*) FROM vip_order WHERE DATE(create_time) = CURDATE()) +
+                (SELECT COUNT(*) FROM course_order WHERE DATE(create_time) = CURDATE())
+            ) AS todayNewOrders,
+            -- 今日收入：VIP订单收入 + 课程订单收入
+            (
+                (SELECT IFNULL(SUM(price), 0) FROM vip_order WHERE status = 1 AND DATE(pay_time) = CURDATE()) +
+                (SELECT IFNULL(SUM(pay_amount), 0) FROM course_order WHERE status = 1 AND DATE(pay_time) = CURDATE())
+            ) AS todayRevenue,
+            -- 本月新增用户
+            (SELECT COUNT(*) FROM user WHERE DATE_FORMAT(create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) AS monthNewUsers,
+            -- 本月新增订单：VIP订单 + 课程订单
+            (
+                (SELECT COUNT(*) FROM vip_order WHERE DATE_FORMAT(create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) +
+                (SELECT COUNT(*) FROM course_order WHERE DATE_FORMAT(create_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'))
+            ) AS monthNewOrders,
+            -- 本月收入：VIP订单收入 + 课程订单收入
+            (
+                (SELECT IFNULL(SUM(price), 0) FROM vip_order WHERE status = 1 AND DATE_FORMAT(pay_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) +
+                (SELECT IFNULL(SUM(pay_amount), 0) FROM course_order WHERE status = 1 AND DATE_FORMAT(pay_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m'))
+            ) AS monthRevenue
+    </select>
+    
+    <!-- 获取课程分类分布 -->
+    <select id="getCourseCategoryDistribution" resultType="com.zm.zx.admin.model.vo.CourseCategoryDistributionVO">
+        SELECT
+            IFNULL(cc.name, '未分类') AS categoryName,
+            COUNT(c.id) AS courseCount
+        FROM course c
+        LEFT JOIN course_category cc ON c.category_id = cc.id
+        GROUP BY c.category_id, cc.name
+        ORDER BY courseCount DESC
+    </select>
+    
+    <!-- 获取最近N天每日注册用户数 -->
+    <select id="getDailyUserCount" resultType="com.zm.zx.admin.model.vo.DailyUserCountVO">
+        SELECT
+            DATE(create_time) AS date,
+            COUNT(*) AS userCount
+        FROM user
+        WHERE DATE(create_time) >= DATE_SUB(CURDATE(), INTERVAL #{days} - 1 DAY)
+        AND DATE(create_time) &lt;= CURDATE()
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+    
+    <!-- 获取最近N天每日订单数趋势（分课程订单和VIP订单） -->
+    <select id="getDailyOrderTrend" resultType="com.zm.zx.admin.model.vo.DailyOrderTrendVO">
+        SELECT
+            all_dates.date,
+            IFNULL(course_orders.orderCount, 0) AS courseOrderCount,
+            IFNULL(vip_orders.orderCount, 0) AS vipOrderCount,
+            IFNULL(course_orders.orderCount, 0) + IFNULL(vip_orders.orderCount, 0) AS totalOrderCount
+        FROM (
+            -- 生成最近N天的日期列表
+            SELECT DATE_SUB(CURDATE(), INTERVAL seq.seq DAY) AS date
+            FROM (
+                SELECT 0 AS seq UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+                SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL
+                SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL
+                SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL
+                SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18 UNION ALL SELECT 19 UNION ALL
+                SELECT 20 UNION ALL SELECT 21 UNION ALL SELECT 22 UNION ALL SELECT 23 UNION ALL
+                SELECT 24 UNION ALL SELECT 25 UNION ALL SELECT 26 UNION ALL SELECT 27 UNION ALL
+                SELECT 28 UNION ALL SELECT 29
+            ) AS seq
+            WHERE seq.seq &lt; #{days}
+        ) AS all_dates
+        LEFT JOIN (
+            -- 课程订单统计（course_order表）
+            SELECT DATE(create_time) AS date, COUNT(*) AS orderCount
+            FROM course_order
+            WHERE DATE(create_time) >= DATE_SUB(CURDATE(), INTERVAL #{days} - 1 DAY)
+            AND DATE(create_time) &lt;= CURDATE()
+            GROUP BY DATE(create_time)
+        ) AS course_orders ON all_dates.date = course_orders.date
+        LEFT JOIN (
+            -- VIP订单统计
+            SELECT DATE(create_time) AS date, COUNT(*) AS orderCount
+            FROM vip_order
+            WHERE DATE(create_time) >= DATE_SUB(CURDATE(), INTERVAL #{days} - 1 DAY)
+            AND DATE(create_time) &lt;= CURDATE()
+            GROUP BY DATE(create_time)
+        ) AS vip_orders ON all_dates.date = vip_orders.date
+        ORDER BY all_dates.date ASC
+    </select>
+    
+    <!-- 获取最近N天每日新增课程数 -->
+    <select id="getDailyCourseCount" resultType="com.zm.zx.admin.model.vo.DailyCourseCountVO">
+        SELECT
+            DATE(create_time) AS date,
+            COUNT(*) AS courseCount
+        FROM course
+        WHERE DATE(create_time) >= DATE_SUB(CURDATE(), INTERVAL #{days} - 1 DAY)
+        AND DATE(create_time) &lt;= CURDATE()
+        GROUP BY DATE(create_time)
+        ORDER BY date ASC
+    </select>
+    
+</mapper>
+

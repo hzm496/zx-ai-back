@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.UserCourseMapper">
+
+    <!-- 分页查询用户的课程列表 -->
+    <select id="findUserCoursesPage" resultType="com.zm.zx.web.model.vo.MyCourseVO">
+        SELECT
+            c.id AS courseId,
+            c.title,
+            c.cover,
+            c.price,
+            c.teacher_id AS teacherId,
+            t.name AS teacherName,
+            c.difficulty,
+            CASE c.difficulty
+                WHEN 1 THEN '入门'
+                WHEN 2 THEN '初级'
+                WHEN 3 THEN '中级'
+                WHEN 4 THEN '高级'
+                ELSE '未知'
+            END AS difficultyName,
+            c.duration,
+            uc.source_type AS sourceType,
+            CASE uc.source_type
+                WHEN 1 THEN '购买'
+                WHEN 2 THEN 'VIP免费'
+                WHEN 3 THEN '赠送'
+                WHEN 4 THEN '兑换'
+                ELSE '未知'
+            END AS sourceTypeName,
+            uc.create_time AS obtainTime,
+            0 AS progress
+        FROM user_course uc
+        INNER JOIN course c ON uc.course_id = c.id
+        LEFT JOIN teacher t ON c.teacher_id = t.id
+        WHERE uc.user_id = #{userId}
+          AND uc.is_valid = 1
+        ORDER BY uc.create_time DESC
+    </select>
+
+    <!-- 检查用户是否拥有课程 -->
+    <select id="checkUserHasCourse" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM user_course
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+          AND is_valid = 1
+    </select>
+
+</mapper>
+

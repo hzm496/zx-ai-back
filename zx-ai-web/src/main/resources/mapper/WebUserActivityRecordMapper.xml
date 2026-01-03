@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.WebUserActivityRecordMapper">
+
+    <!-- 统计用户领取某活动的次数 -->
+    <select id="countUserActivityReceive" resultType="int">
+        SELECT COUNT(*)
+        FROM user_activity_record
+        WHERE user_id = #{userId}
+          AND activity_id = #{activityId}
+    </select>
+
+</mapper>
+

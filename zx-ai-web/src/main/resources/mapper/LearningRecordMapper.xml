@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.LearningRecordMapper">
+
+    <!-- 查询用户的学习记录列表（带课程和章节信息）
+         由于每个用户每个课程只有一条记录（通过唯一索引 uk_user_course 保证），无需去重 -->
+    <select id="selectLearningRecordsByUserId" resultType="com.zm.zx.web.domain.vo.LearningRecordVO">
+        SELECT 
+            lr.id,
+            lr.user_id,
+            lr.course_id,
+            c.title AS course_title,
+            c.cover AS course_cover,
+            lr.chapter_id,
+            ch.title AS chapter_title,
+            lr.progress,
+            lr.duration,
+            CASE 
+                WHEN lr.duration > 0 THEN ROUND(lr.progress * 100.0 / lr.duration, 0)
+                ELSE 0 
+            END AS progress_percent,
+            lr.is_finished,
+            lr.last_learn_time
+        FROM learning_record lr
+        LEFT JOIN course c ON lr.course_id = c.id
+        LEFT JOIN course_chapter ch ON lr.chapter_id = ch.id
+        WHERE lr.user_id = #{userId}
+        ORDER BY lr.last_learn_time DESC
+    </select>
+
+    <!-- 查询用户在某个课程的最新学习记录 -->
+    <select id="selectLearningRecordByCourseId" resultType="com.zm.zx.web.domain.vo.LearningRecordVO">
+        SELECT 
+            lr.id,
+            lr.user_id,
+            lr.course_id,
+            c.title AS course_title,
+            c.cover AS course_cover,
+            lr.chapter_id,
+            ch.title AS chapter_title,
+            lr.progress,
+            lr.duration,
+            CASE 
+                WHEN lr.duration > 0 THEN ROUND(lr.progress * 100.0 / lr.duration, 0)
+                ELSE 0 
+            END AS progress_percent,
+            lr.is_finished,
+            lr.last_learn_time
+        FROM learning_record lr
+        LEFT JOIN course c ON lr.course_id = c.id
+        LEFT JOIN course_chapter ch ON lr.chapter_id = ch.id
+        WHERE lr.user_id = #{userId} AND lr.course_id = #{courseId}
+        ORDER BY lr.last_learn_time DESC
+        LIMIT 1
+    </select>
+
+    <!-- 插入或更新学习记录
+         利用唯一索引 uk_user_course(user_id, course_id)
+         如果 (user_id, course_id) 组合已存在则更新，否则插入
+         这样可以保证每个用户的每个课程只有一条学习记录（记录最后学习的章节） -->
+    <insert id="insertOrUpdate" parameterType="com.zm.zx.web.domain.po.LearningRecord">
+        INSERT INTO learning_record (
+            user_id,
+            course_id,
+            chapter_id,
+            progress,
+            duration,
+            is_finished,
+            last_learn_time,
+            create_time
+        ) VALUES (
+            #{userId},
+            #{courseId},
+            #{chapterId},
+            #{progress},
+            #{duration},
+            #{isFinished},
+            #{lastLearnTime},
+            NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            chapter_id = VALUES(chapter_id),
+            progress = VALUES(progress),
+            duration = VALUES(duration),
+            is_finished = VALUES(is_finished),
+            last_learn_time = VALUES(last_learn_time),
+            update_time = NOW()
+    </insert>
+
+</mapper>
+

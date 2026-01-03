@@ -1,0 +1,216 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-parent</artifactId>
+        <version>3.2.0</version>
+    </parent>
+
+    <groupId>com.zm</groupId>
+    <artifactId>zx-ai-back</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>zx-ai-back</name>
+    <url>http://maven.apache.org</url>
+    <modules>
+        <module>zx-ai-web</module>
+        <module>zx-ai-common</module>
+        <module>zx-ai-admin</module>
+        <module>zx-ai-auth</module>
+        <module>zx-ai-pay</module>
+    </modules>
+
+    <properties>
+        <!--springboot-->
+        <springboot.version>3.2.0</springboot.version>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!--sa-token-->
+        <sa-token.version>1.44.0</sa-token.version>
+        <!--mysql-->
+        <mysql.version>8.0.33</mysql.version>
+        <!--mybatis-plus-->
+        <mybatis-plus.version>3.5.9</mybatis-plus.version>
+        <!--hutool-->
+        <hutool.version>5.8.13</hutool.version>
+        <!--minio-->
+        <minio.version>8.2.1</minio.version>
+        <!--lombok-->
+        <lombok.version>1.18.20</lombok.version>
+        <!--druid-->
+        <druid.version>1.2.1</druid.version>
+        <!--Guava-->
+        <guava.version>32.1.2-jre</guava.version>
+        <!--rocketmq-->
+        <rocketmq.version>2.2.3</rocketmq.version>
+        <!--redisson-->
+        <redisson.version>3.17.5</redisson.version>
+        <spring-ai.version>1.0.0</spring-ai.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${springboot.version}</version>
+            </dependency>
+            <!--hutool-->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <!--mysql-->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <!--druid-->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <!--sa-token-->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-spring-boot3-starter</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <!-- Sa-Token 整合 RedisTemplate -->
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-redis-template</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+            <!-- 对象存储 Minio -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+            <!--lombok-->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.20</version>
+            </dependency>
+            <!--Guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+
+
+            <!--common-->
+            <dependency>
+                <groupId>com.zm</groupId>
+                <artifactId>zx-ai-common</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!--auth-->
+            <dependency>
+                <groupId>com.zm</groupId>
+                <artifactId>zx-ai-auth</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!--web-->
+            <dependency>
+                <groupId>com.zm</groupId>
+                <artifactId>zx-ai-web</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!--admin-->
+            <dependency>
+                <groupId>com.zm</groupId>
+                <artifactId>zx-ai-admin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!--pay-->
+            <dependency>
+                <groupId>com.zm</groupId>
+                <artifactId>zx-ai-pay</artifactId>
+                <version>1.0-SNAPSHOT</version>
+            </dependency>
+            <!-- Rocket MQ -->
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-spring-boot-starter</artifactId>
+                <version>${rocketmq.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>spring-snapshots</id>
+            <name>Spring Snapshots</name>
+            <url>https://repo.spring.io/snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- 添加华为云、阿里云 maven 中央仓库，提升 Jar 包下载速度 -->
+        <repository>
+            <id>huaweicloud</id>
+            <name>huawei</name>
+            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+        </repository>
+        <repository>
+            <id>aliyunmaven</id>
+            <name>aliyun</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+
+    <!--编译插件-->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <parameters>true</parameters>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

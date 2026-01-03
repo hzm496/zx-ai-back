@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.WebActivityMapper">
+
+    <!-- 查询可领取的活动列表 -->
+    <select id="findAvailableActivities" resultType="com.zm.zx.web.model.vo.ActivityVO">
+        SELECT
+            a.id,
+            a.title,
+            a.description,
+            a.type,
+            CASE a.type
+                WHEN 1 THEN '送会员'
+                WHEN 2 THEN '送优惠券'
+                ELSE '未知'
+            END AS typeName,
+            a.cover_image AS coverImage,
+            a.start_time AS startTime,
+            a.end_time AS endTime,
+            a.limit_per_user AS limitPerUser,
+            a.total_limit AS totalLimit,
+            a.receive_count AS receiveCount,
+            ar.reward_type AS rewardType,
+            ar.vip_duration AS vipDuration,
+            CASE ar.vip_duration
+                WHEN 30 THEN '月卡'
+                WHEN 90 THEN '季卡'
+                WHEN 365 THEN '年卡'
+                ELSE CONCAT(ar.vip_duration, '天')
+            END AS vipDurationName,
+            ar.coupon_amount AS couponAmount,
+            ar.coupon_min_amount AS couponMinAmount,
+            ar.coupon_expire_days AS couponExpireDays,
+            (SELECT COUNT(*) FROM user_activity_record WHERE user_id = #{userId} AND activity_id = a.id) AS userReceiveCount
+        FROM activity a
+        LEFT JOIN activity_reward ar ON a.id = ar.activity_id
+        WHERE a.status = 1
+          AND NOW() BETWEEN a.start_time AND a.end_time
+        ORDER BY a.create_time DESC
+    </select>
+
+    <!-- 查询活动详情 -->
+    <select id="findActivityDetail" resultType="com.zm.zx.web.model.vo.ActivityVO">
+        SELECT
+            a.id,
+            a.title,
+            a.description,
+            a.type,
+            CASE a.type
+                WHEN 1 THEN '送会员'
+                WHEN 2 THEN '送优惠券'
+                ELSE '未知'
+            END AS typeName,
+            a.cover_image AS coverImage,
+            a.start_time AS startTime,
+            a.end_time AS endTime,
+            a.limit_per_user AS limitPerUser,
+            a.total_limit AS totalLimit,
+            a.receive_count AS receiveCount,
+            ar.reward_type AS rewardType,
+            ar.vip_duration AS vipDuration,
+            CASE ar.vip_duration
+                WHEN 30 THEN '月卡'
+                WHEN 90 THEN '季卡'
+                WHEN 365 THEN '年卡'
+                ELSE CONCAT(ar.vip_duration, '天')
+            END AS vipDurationName,
+            ar.coupon_amount AS couponAmount,
+            ar.coupon_min_amount AS couponMinAmount,
+            ar.coupon_expire_days AS couponExpireDays,
+            (SELECT COUNT(*) FROM user_activity_record WHERE user_id = #{userId} AND activity_id = a.id) AS userReceiveCount
+        FROM activity a
+        LEFT JOIN activity_reward ar ON a.id = ar.activity_id
+        WHERE a.id = #{activityId}
+    </select>
+
+</mapper>
+
+

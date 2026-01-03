@@ -1,0 +1,99 @@
+# 激活的配置文件（dev=开发环境, prod=生产环境）
+spring:
+  profiles:
+    active: dev
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode # OpenAI 服务的访问地址，这里使用的是阿里云百炼
+      api-key: sk-d4063349aa31413783ad2667d8990cc3
+      chat:
+        options:
+          model: qwen-plus # 模型名称
+          temperature: 0.7 # 温度值
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    username: root
+
+    type: com.alibaba.druid.pool.DruidDataSource
+  data:
+    redis:
+      database: 4
+      port: 6379
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 500MB  # 单个文件最大大小
+      max-request-size: 500MB  # 整个请求最大大小
+#mybatis-plus
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    mapper-locations: classpath*:mapper/*.xml
+############## Sa-Token 配置 (文档: https://sa-token.cc) ##############
+sa-token:
+  # token 名称（同时也是 cookie 名称）
+  token-name: Authorization
+  # token 有效期（单位：秒） 默认30天，-1 代表永久有效
+  timeout: 2592000
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: -1
+  # 是否允许同一账号多地同时登录 （为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个 token （为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
+  is-share: false
+  # token 风格（默认可取值：uuid、simple-uuid、random-32、random-64、random-128、tik）
+  token-style: random-128
+  # 是否输出操作日志
+  is-log: true
+  # token 前缀（前端传 token 时需要带此前缀，如 "Bearer xxxxx"）
+  token-prefix: "Bearer"
+  # 是否从 cookie 中读取 token（前后端分离项目一般设置为 false）
+  is-read-cookie: false
+  # 是否从 header 中读取 token
+  is-read-header: true
+  # 是否从 body 中读取 token
+  is-read-body: false
+# 支付宝沙箱配置（公共部分）
+alipay:
+  # 应用ID（需要从支付宝开放平台获取）
+  app-id: 9021000157619771
+  # 商户私钥（需要自己生成，并上传公钥到支付宝）
+  private-key: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCB7Ym3PavYAHtPtD2HlemGC/cJ/ifJZJdtenr8avXa+X7Ru5C5tgQl3YkWEzs8jCHxSSSYmZVA+3DNONO5IbMhqsTxwmSb0Zm7Hxa2s7dKNruBcSbPzeDin5Oq4nvacnXuBQu4wSfkwkGjpm9vxiKHc5yncoafUBITQYiuiZQroN26zr5iqwXy4NJqGpmVeXJwlMtwPPWrS9a+NsFvdcgZMk0Ex9AAyu9I/2jwFjVU14iz5Rhnj1SDXCq5n7mtTiOSneSY0ZYCV9Ir2BGVBeSEY2j4bVK/uxQCz6pV5BrHoXsFZV8d/DcAt8O+xfwamfd3pVyG2KpObxCSkONd53iHAgMBAAECggEAWNcfb5hPxGav6pQH7onnH61WwhJzChYqJMW3Cpnoek5XFPn3v8RhmbKdZebIfmIjY2TsDRwXHlPPkcPloZUVc1PdTqHpQVJUl8puMYc5MRmzpJLGQxk3SD5tLk+m+HuDf7kbhr0slhLt5wSK9ha4zX2UBDsfKhgKA/iviQixtBJVdf0OkjjeJ9uZEPfrkUmDhJs9PnVAIwk509hJPshuDI9UbMmzjr7pjaRx43m6sMIyO08S+ok1zAT/7CzpD4k1lz+FP2pZFOsxxuZTQkMXGxMqArzcblpQpm67jTFPV0cwWK/IqSDnm2/zvbGpAxQAUIEzusSKu8DX87gxDybVwQKBgQC9PXM0H+W2R7HW18lLL8iP+/16hBtWChQ3lLiVMQzHx+yo6ExKPxTaU/O1fVrtVYrQbc2HXTFJJPG6zHXQyjOwP8ZszulRBrACBpTs1Q4OyBanIWcEnd/Pa5xcN4XkeU0HbwZtD7PMBENNwuQjlhW0WtpEjc74WCrUFMHPQSEoHwKBgQCvw4TIcUxzMqg/b5QS6LxCgk8M9CkgcHfftck7ce39S6SO/wnKfXDu1qpQBhmZDvhtnGSVlCKVirsULEAo2DaYtIvZ3xHVJ4FLL7RhgeQs2qfnWbdQYErseQpj9vHw4ZccLtUIK51Z2I75Bm5uwkb00m1tDB3uvnd+KXzhBXHCmQKBgG28G3jHYlov+tUdbjF2NPQhaJxJzNw4nf6Y8+w3dDTJHtfXVJ3dNIdiFTlRxo9HgmZYtczf4nuKu83ZUBxRlGWIpdRkq3D70sZp8KPg6/TwXApwWR+ZOLY7rYDgBXk2Sc+ctvo5F8afVjPaZpaoKk/aOyVzoefqoHM40iYPm117AoGAFAXoGJWfqff5ZtClQ8ozuDf0HXurO8DURy4EcLs364U0h/3R9bl4phzaZidrvx4Pex038Dph/jtBuLiZzo1jGt5mmDlrZKcNea1DlWAgyGNYgWidE5EEuA/J+T1mrpRkjJdhOX8Oe+/JyeDLr95+CuH2CVg6CLq2Di9XxKLEJPECgYAEr898WY74Q2QfVCibm/fnCSgC5dDnZL/4DnHPJVDoZ1ns76B+n1eqfZDxT2bNOhmc3/wp3gJZh36KDH8T4GQVqEbpCFut5ZCKFFouANX4IqQJK+lTZWIAvetfefOqLz18BBUZcq2b/urL1qZ3kj3B7/KaLL4cXaHrTVrKMr/gng==
+  # 支付宝公钥（从支付宝开放平台获取）
+  public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApdvDw4XZO/Dxa2gr/xDIi0WRFIIoE07jnAp8ZSbh3SPVteB3k1A4OmbnEmLU1fddwmhVZ7luh7iujMZUU8SPhHCQKm0EVf94xv4VAofLHrI1/PAG8pj1Fb8rJJT1uWVMO8DCVq4x3scAf1d2IEmbe4umiC4yr1owvtn/jib3Hhg9y370Fh4pIwsuJZrp3jXoStsOhmHjOBJBGfd2i3YpFF7s8h4dO8zAcFw4bdll/cQGyJFU31168Pll7bFvJYDUoXeGCuQYuvbqoXZ2ubkl7CoMeLjgikmSPmLTL3DGLRVk89Qb+aURGMaDAHDY3xnYlGPosKazUTinxb/9S9++PwIDAQAB
+  # 签名方式
+  sign-type: RSA2
+  # 字符编码格式
+  charset: UTF-8
+  # 支付宝网关（沙箱环境）
+  gateway-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+  # 数据格式
+  format: json
+
+# RocketMQ配置（公共部分）
+rocketmq:
+  producer:
+    group: zm_bs_group
+    send-message-timeout: 3000 # 消息发送超时时间，默认 3s
+    retry-times-when-send-failed: 3 # 同步发送消息失败后，重试的次数
+    retry-times-when-send-async-failed: 3 # 异步发送消息失败后，重试的次数
+    max-message-size: 4096 # 消息最大大小
+  consumer:
+    group: zm_bs_group
+    pull-batch-size: 5 # 每次拉取的最大消息数
+
+# 日志配置
+logging:
+  level:
+    # 关闭客服相关的SQL查询日志
+    com.zm.zx.web.mapper.CustomerServiceMessageMapper: ERROR
+    # 关闭客服Service的业务日志
+    CustomerService: ERROR

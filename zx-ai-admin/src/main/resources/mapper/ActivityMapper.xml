@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.admin.mapper.AdminActivityMapper">
+
+    <!-- 分页查询活动列表 -->
+    <select id="findActivityList" resultType="com.zm.zx.admin.model.vo.ActivityVO">
+        SELECT
+            a.id,
+            a.title,
+            a.description,
+            a.type,
+            CASE a.type
+                WHEN 1 THEN '送会员'
+                WHEN 2 THEN '送优惠券'
+                ELSE '未知'
+            END AS typeName,
+            a.cover_image AS coverImage,
+            a.start_time AS startTime,
+            a.end_time AS endTime,
+            a.limit_per_user AS limitPerUser,
+            a.total_limit AS totalLimit,
+            a.receive_count AS receiveCount,
+            a.status,
+            CASE a.status
+                WHEN 0 THEN '禁用'
+                WHEN 1 THEN '启用'
+                ELSE '未知'
+            END AS statusName,
+            CASE
+                WHEN NOW() &lt; a.start_time THEN 1
+                WHEN NOW() BETWEEN a.start_time AND a.end_time THEN 2
+                ELSE 3
+            END AS activityStatus,
+            CASE
+                WHEN NOW() &lt; a.start_time THEN '未开始'
+                WHEN NOW() BETWEEN a.start_time AND a.end_time THEN '进行中'
+                ELSE '已结束'
+            END AS activityStatusName,
+            ar.id AS rewardId,
+            ar.reward_type AS rewardType,
+            ar.vip_duration AS vipDuration,
+            CASE ar.vip_duration
+                WHEN 1 THEN '体验卡'
+                WHEN 30 THEN '月卡'
+                WHEN 90 THEN '季卡'
+                WHEN 365 THEN '年卡'
+                ELSE CONCAT(ar.vip_duration, '天')
+            END AS vipDurationName,
+            ar.coupon_amount AS couponAmount,
+            ar.coupon_min_amount AS couponMinAmount,
+            ar.coupon_expire_days AS couponExpireDays,
+            a.create_time AS createTime,
+            a.update_time AS updateTime
+        FROM activity a
+        LEFT JOIN activity_reward ar ON a.id = ar.activity_id
+        <where>
+            <if test="dto.title != null and dto.title != ''">
+                AND a.title LIKE CONCAT('%', #{dto.title}, '%')
+            </if>
+            <if test="dto.type != null">
+                AND a.type = #{dto.type}
+            </if>
+            <if test="dto.status != null">
+                AND a.status = #{dto.status}
+            </if>
+        </where>
+        ORDER BY a.create_time DESC
+    </select>
+
+</mapper>

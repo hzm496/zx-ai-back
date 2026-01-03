@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.WebFeedbackMapper">
+    
+    <!-- 通用结果映射 -->
+    <resultMap id="FeedbackVOMap" type="com.zm.zx.common.model.feedback.vo.FeedbackVO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="content" property="content"/>
+        <result column="is_read" property="isRead"/>
+        <result column="reply" property="reply"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+    
+    <!-- 分页查询反馈列表 -->
+    <select id="findFeedbackList" resultMap="FeedbackVOMap">
+        SELECT
+            id,
+            user_id,
+            username,
+            email,
+            phone,
+            content,
+            is_read,
+            reply,
+            create_time,
+            update_time
+        FROM feedback
+        <where>
+            <if test="dto.isRead != null">
+                AND is_read = #{dto.isRead}
+            </if>
+            <if test="dto.keyword != null and dto.keyword != ''">
+                AND (
+                    username LIKE CONCAT('%', #{dto.keyword}, '%')
+                    OR email LIKE CONCAT('%', #{dto.keyword}, '%')
+                    OR content LIKE CONCAT('%', #{dto.keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY is_read ASC, create_time DESC
+    </select>
+    
+    <!-- 获取未读反馈数量 -->
+    <select id="getUnreadCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM feedback WHERE is_read = 0
+    </select>
+    
+</mapper>
+

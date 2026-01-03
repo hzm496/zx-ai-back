@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.web.mapper.CourseOrderMapper">
+
+    <!-- 分页查询用户的课程订单列表 -->
+    <select id="findUserCourseOrdersPage" resultType="com.zm.zx.web.model.vo.CourseOrderVO">
+        SELECT
+            id,
+            order_no AS orderNo,
+            course_id AS courseId,
+            course_title AS courseTitle,
+            course_cover AS courseCover,
+            original_price AS originalPrice,
+            pay_amount AS payAmount,
+            pay_type AS payType,
+            CASE pay_type
+                WHEN 1 THEN '余额支付'
+                WHEN 2 THEN '支付宝'
+                ELSE '未知'
+            END AS payTypeName,
+            status,
+            CASE status
+                WHEN 0 THEN '待支付'
+                WHEN 1 THEN '已支付'
+                WHEN 2 THEN '已取消'
+                WHEN 3 THEN '已退款'
+                ELSE '未知'
+            END AS statusName,
+            pay_time AS payTime,
+            cancel_time AS cancelTime,
+            create_time AS createTime
+        FROM course_order
+        WHERE user_id = #{userId}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 管理员分页查询课程订单列表 -->
+    <select id="findCourseOrderListForAdmin" resultType="com.zm.zx.web.model.vo.CourseOrderVO">
+        SELECT
+            co.id,
+            co.order_no AS orderNo,
+            co.user_id AS userId,
+            co.course_id AS courseId,
+            co.course_title AS courseTitle,
+            co.course_cover AS courseCover,
+            co.original_price AS originalPrice,
+            co.pay_amount AS payAmount,
+            co.pay_type AS payType,
+            CASE co.pay_type
+                WHEN 1 THEN '余额支付'
+                WHEN 2 THEN '支付宝'
+                ELSE '未知'
+            END AS payTypeName,
+            co.status,
+            CASE co.status
+                WHEN 0 THEN '待支付'
+                WHEN 1 THEN '已支付'
+                WHEN 2 THEN '已取消'
+                WHEN 3 THEN '已退款'
+                ELSE '未知'
+            END AS statusName,
+            co.alipay_trade_no AS alipayTradeNo,
+            co.pay_time AS payTime,
+            co.cancel_time AS cancelTime,
+            co.refund_time AS refundTime,
+            co.refund_reason AS refundReason,
+            co.create_time AS createTime,
+            co.update_time AS updateTime
+        FROM course_order co
+        <where>
+            <if test="dto.orderNo != null and dto.orderNo != ''">
+                AND co.order_no = #{dto.orderNo}
+            </if>
+            <if test="dto.courseTitle != null and dto.courseTitle != ''">
+                AND co.course_title LIKE CONCAT('%', #{dto.courseTitle}, '%')
+            </if>
+            <if test="dto.status != null">
+                AND co.status = #{dto.status}
+            </if>
+            <if test="dto.payType != null">
+                AND co.pay_type = #{dto.payType}
+            </if>
+            <if test="dto.userId != null">
+                AND co.user_id = #{dto.userId}
+            </if>
+            <if test="dto.startTime != null and dto.startTime != ''">
+                AND co.create_time >= #{dto.startTime}
+            </if>
+            <if test="dto.endTime != null and dto.endTime != ''">
+                AND co.create_time &lt;= #{dto.endTime}
+            </if>
+        </where>
+        ORDER BY co.create_time DESC
+    </select>
+    <select id="findUserIsPuerchased" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM course_order
+        WHERE user_id = #{userId}
+          AND course_id = #{courseId}
+          AND status = 1
+    </select>
+
+</mapper>
+

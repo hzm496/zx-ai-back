@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zm.zx.common.mapper.CourseChapterMapper">
+
+    <resultMap id="BaseResultMap" type="com.zm.zx.common.model.course.po.CourseChapter">
+            <id property="id" column="id" />
+            <result property="courseId" column="course_id" />
+            <result property="title" column="title" />
+            <result property="videoUrl" column="video_url" />
+            <result property="videoDuration" column="video_duration" />
+            <result property="parentId" column="parent_id" />
+            <result property="sort" column="sort" />
+            <result property="isFree" column="is_free" />
+
+            <result property="status" column="status" />
+            <result property="createTime" column="create_time" />
+            <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,course_id,title,video_url,video_duration,parent_id,
+        sort,is_free,status,create_time,update_time
+    </sql>
+</mapper>
